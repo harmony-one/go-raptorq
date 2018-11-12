@@ -1,0 +1,407 @@
+%module libraptorq
+
+%{
+#include <future>
+#include <utility>
+#include <cstdint>
+#define RQ_LITTLE_ENDIAN  // TODO ek: uh... un-hack this before we hit mobile?
+#include <RaptorQ/RFC6330_v1_hdr.hpp>
+%}
+
+static const uint64_t RFC6330_max_data = 946270874880;
+typedef uint64_t RFC6330_OTI_Common_Data;
+typedef uint32_t RFC6330_OTI_Scheme_Specific_Data;
+
+namespace RaptorQ__v1 {
+
+enum class Compress : uint8_t { NONE = RQ_COMPRESS_NONE,
+                                LZ4 = RQ_COMPRESS_LZ4
+                                };
+
+enum class Error : uint8_t {
+                        NONE = RQ_ERR_NONE,
+                        NOT_NEEDED = RQ_ERR_NOT_NEEDED,
+                        WRONG_INPUT = RQ_ERR_WRONG_INPUT,
+                        NEED_DATA = RQ_ERR_NEED_DATA,
+                        WORKING = RQ_ERR_WORKING,
+                        INITIALIZATION = RQ_ERR_INITIALIZATION,
+                        EXITING = RQ_ERR_EXITING
+                        };
+
+enum class Work_State : uint8_t {
+    KEEP_WORKING = RQ_WORK_KEEP_WORKING,
+    ABORT_COMPUTATION = RQ_WORK_ABORT_COMPUTATION,
+};
+
+enum class Compute : uint8_t {
+    NONE = RQ_COMPUTE_NONE,
+    PARTIAL_FROM_BEGINNING = RQ_COMPUTE_PARTIAL_FROM_BEGINNING,
+    PARTIAL_ANY = RQ_COMPUTE_PARTIAL_ANY,
+    COMPLETE = RQ_COMPUTE_COMPLETE,
+    NO_BACKGROUND = RQ_COMPUTE_NO_BACKGROUND,
+    NO_POOL = RQ_COMPUTE_NO_POOL,
+    NO_RETRY = RQ_COMPUTE_NO_RETRY
+};
+
+enum class Fill_With_Zeros : uint8_t { NO  = RQ_NO_FILL,
+                                       YES = RQ_FILL_WITH_ZEROS };
+
+Compress supported_compressions();
+Compress get_compression();
+bool set_compression(Compress const compression);
+size_t local_cache_size (size_t const local_cache);
+size_t get_local_cache_size();
+
+} // namespace RaptorQ__v1
+
+namespace RFC6330__v1 {
+
+using Compute = RaptorQ__v1::Compute;
+using Compress = RaptorQ__v1::Compress;
+using Error = RaptorQ__v1::Error;
+using Fill_With_Zeros = RaptorQ__v1::Fill_With_Zeros;
+using Work_State = RaptorQ__v1::Work_State;
+#if 0
+#endif
+using RaptorQ__v1::supported_compressions;
+using RaptorQ__v1::get_compression;
+using RaptorQ__v1::set_compression;
+using RaptorQ__v1::local_cache_size;
+using RaptorQ__v1::get_local_cache_size;
+
+} // namespace RFC6330__v1
+
+namespace RFC6330__v1 {
+
+bool set_thread_pool (const size_t threads,
+                      const uint16_t max_block_concurrency,
+                      const RFC6330__v1::Work_State exit_type);
+// TODO ek: where is Work_State defined?
+
+} // namespace RFC6330__v1
+
+namespace RFC6330__v1 {
+namespace Impl {
+
+template<typename Rnd_It, typename Fwd_It>
+class Encoder;
+template<typename In_It, typename Fwd_It>
+class Decoder;
+
+} // namespace Impl
+
+namespace It {
+namespace Encoder {
+
+template <typename Rnd_It, typename Fwd_It>
+class Symbol
+{
+public:
+    Symbol (Impl::Encoder<Rnd_It, Fwd_It> *const enc, const uint32_t id);
+    Symbol() = delete;
+    Symbol (const Symbol&) = default;
+    Symbol& operator= (const Symbol&) = default;
+    Symbol (Symbol&&) = default;
+    Symbol& operator= (Symbol&&) = default;
+    ~Symbol() = default;
+
+    uint64_t operator() (Fwd_It &start, const Fwd_It end);
+    uint32_t id() const;
+
+    uint8_t block() const;
+
+    uint32_t esi() const;
+};
+
+template <typename Rnd_It, typename Fwd_It>
+class Symbol_Iterator :
+        public std::iterator<std::input_iterator_tag, Symbol<Rnd_It, Fwd_It>>
+{
+public:
+    Symbol_Iterator (Impl::Encoder<Rnd_It, Fwd_It> *const enc, const uint32_t id);
+    Symbol_Iterator() = delete;
+    Symbol_Iterator (const Symbol_Iterator&) = default;
+    Symbol_Iterator& operator= (const Symbol_Iterator&) = default;
+    Symbol_Iterator (Symbol_Iterator&&) = default;
+    Symbol_Iterator& operator= (Symbol_Iterator&&) = default;
+    ~Symbol_Iterator() = default;
+
+    Symbol<Rnd_It, Fwd_It> operator*();
+    Symbol_Iterator<Rnd_It, Fwd_It>& operator++();
+    Symbol_Iterator<Rnd_It, Fwd_It> operator++ (const int i) const;
+    bool operator== (const Symbol_Iterator<Rnd_It, Fwd_It> &it) const;
+    bool operator!= (const Symbol_Iterator<Rnd_It, Fwd_It> &it) const;
+};
+
+
+template <typename Rnd_It, typename Fwd_It>
+class Block
+{
+public:
+    Block (Impl::Encoder<Rnd_It, Fwd_It> *const enc, const uint8_t block);
+    Block() = delete;
+    Block (const Block&) = default;
+    Block& operator= (const Block&) = default;
+    Block (Block&&) = default;
+    Block& operator= (Block&&) = default;
+    ~Block() = default;
+
+    Symbol_Iterator<Rnd_It, Fwd_It> begin_source() const;
+    Symbol_Iterator<Rnd_It, Fwd_It> end_source() const;
+    Symbol_Iterator<Rnd_It, Fwd_It> begin_repair() const;
+    Symbol_Iterator<Rnd_It, Fwd_It> end_repair (uint32_t repairs) const;
+
+    uint8_t id() const;
+
+    uint32_t max_repair() const;
+
+    uint16_t symbols() const;
+
+    Block_Size extended_symbols() const;
+
+    uint32_t block_size() const;
+};
+
+template <typename Rnd_It, typename Fwd_It>
+class Block_Iterator :
+        public std::iterator<std::input_iterator_tag, Block<Rnd_It, Fwd_It>>
+{
+public:
+    Block_Iterator (Impl::Encoder<Rnd_It, Fwd_It> *const enc, const uint8_t block);
+    Block_Iterator() = delete;
+    Block_Iterator (const Block_Iterator&) = default;
+    Block_Iterator& operator= (const Block_Iterator&) = default;
+    Block_Iterator (Block_Iterator&&) = default;
+    Block_Iterator& operator= (Block_Iterator&&) = default;
+    ~Block_Iterator() = default;
+
+    Block<Rnd_It, Fwd_It> operator*();
+    Block_Iterator<Rnd_It, Fwd_It>& operator++();
+    Block_Iterator<Rnd_It, Fwd_It> operator++ (const int i) const;
+    bool operator== (const Block_Iterator<Rnd_It, Fwd_It> &it) const;
+    bool operator!= (const Block_Iterator<Rnd_It, Fwd_It> &it) const;
+};
+
+} // namespace Encoder
+
+namespace Decoder {
+
+template <typename In_It, typename Fwd_It>
+class Symbol
+{
+public:
+    Symbol (Impl::Decoder<In_It, Fwd_It> *const dec, const uint32_t id);
+    Symbol() = delete;
+    Symbol (const Symbol&) = default;
+    Symbol& operator= (const Symbol&) = default;
+    Symbol (Symbol&&) = default;
+    Symbol& operator= (Symbol&&) = default;
+    ~Symbol() = default;
+
+    uint64_t operator() (In_It &start, const In_It end);
+    uint32_t id() const;
+
+    uint8_t block() const;
+
+    uint32_t esi() const;
+};
+
+template <typename In_It, typename Fwd_It>
+class Symbol_Iterator :
+        public std::iterator<std::input_iterator_tag, Symbol<In_It, Fwd_It>>
+{
+public:
+    Symbol_Iterator (Impl::Decoder<In_It, Fwd_It> *const dec, const uint32_t id);
+    Symbol_Iterator() = delete;
+    Symbol_Iterator (const Symbol_Iterator&) = default;
+    Symbol_Iterator& operator= (const Symbol_Iterator&) = default;
+    Symbol_Iterator (Symbol_Iterator&&) = default;
+    Symbol_Iterator& operator= (Symbol_Iterator&&) = default;
+    ~Symbol_Iterator() = default;
+
+    Symbol<In_It, Fwd_It> operator*();
+    Symbol_Iterator<In_It, Fwd_It>& operator++();
+    Symbol_Iterator<In_It, Fwd_It> operator++ (const int i) const;
+    bool operator== (const Symbol_Iterator<In_It, Fwd_It> &it) const;
+    bool operator!= (const Symbol_Iterator<In_It, Fwd_It> &it) const;
+};
+
+
+template <typename In_It, typename Fwd_It>
+class Block
+{
+public:
+    Block (Impl::Decoder<In_It, Fwd_It> *const dec, const uint8_t block);
+    Block() = delete;
+    Block (const Block&) = default;
+    Block& operator= (const Block&) = default;
+    Block (Block&&) = default;
+    Block& operator= (Block&&) = default;
+    ~Block() = default;
+
+    Symbol_Iterator<In_It, Fwd_It> begin() const;
+    Symbol_Iterator<In_It, Fwd_It> end() const;
+    uint8_t id() const;
+
+    uint16_t symbols() const;
+
+    Block_Size extended_symbols() const;
+
+
+    uint32_t block_size() const;
+};
+
+template <typename In_It, typename Fwd_It>
+class Block_Iterator :
+        public std::iterator<std::input_iterator_tag, Block<In_It, Fwd_It>>
+{
+public:
+    Block_Iterator (Impl::Decoder<In_It, Fwd_It> *const dec, const uint8_t block);
+    Block_Iterator() = delete;
+    Block_Iterator (const Block_Iterator&) = default;
+    Block_Iterator& operator= (const Block_Iterator&) = default;
+    Block_Iterator (Block_Iterator&&) = default;
+    Block_Iterator& operator= (Block_Iterator&&) = default;
+    ~Block_Iterator() = default;
+
+    Block<In_It, Fwd_It> operator*();
+    Block_Iterator<In_It, Fwd_It>& operator++();
+    Block_Iterator<In_It, Fwd_It> operator++ (const int i) const;
+    bool operator== (const Block_Iterator<In_It, Fwd_It> &it) const;
+    bool operator!= (const Block_Iterator<In_It, Fwd_It> &it) const;
+};
+
+} // namespace Decoder
+} // namespace It
+} // namespace RFC6330__v1
+
+namespace RFC6330__v1 {
+
+constexpr uint64_t max_data = RFC6330_max_data;
+
+namespace Impl {
+
+template <typename Rnd_It, typename Fwd_It>
+class Encoder;
+template <typename In_It, typename Fwd_It>
+class Decoder;
+
+} // namespace Impl
+
+// Expose Encoder and Decoder into RFC6330__v1
+template <typename Rnd_It, typename Fwd_It>
+using Encoder = Impl::Encoder<Rnd_It, Fwd_It>;
+template <typename Rnd_It, typename Fwd_It>
+using Decoder = Impl::Decoder<Rnd_It, Fwd_It>;
+
+namespace Impl {
+
+template <typename Rnd_It, typename Fwd_It>
+class Encoder
+{
+public:
+
+    Encoder() = delete;
+    Encoder (const Encoder&) = delete;
+    Encoder& operator= (const Encoder&) = delete;
+    Encoder (Encoder&&) = delete;
+    Encoder& operator= (Encoder&&) = delete;
+    ~Encoder();
+    Encoder (const Rnd_It data_from, const Rnd_It data_to,
+                                            const uint16_t min_subsymbol_size,
+                                            const uint16_t symbol_size,
+                                            const size_t max_sub_block);
+
+    It::Encoder::Block_Iterator<Rnd_It, Fwd_It> begin ();
+    const It::Encoder::Block_Iterator<Rnd_It, Fwd_It> end ();
+
+    operator bool() const;
+    RFC6330_OTI_Common_Data OTI_Common() const;
+    RFC6330_OTI_Scheme_Specific_Data OTI_Scheme_Specific() const;
+
+    std::future<std::pair<Error, uint8_t>> compute (const Compute flags);
+
+    size_t precompute_max_memory ();
+    size_t encode (Fwd_It &output, const Fwd_It end, const uint32_t esi,
+                                                            const uint8_t sbn);
+
+    size_t encode (Fwd_It &output, const Fwd_It end, const uint32_t id);
+    size_t encode_packet (Fwd_It &output, const Fwd_It end, const uint32_t id);
+
+    void free (const uint8_t sbn);
+    uint8_t blocks() const;
+    uint32_t block_size (const uint8_t sbn) const;
+    uint16_t symbol_size() const;
+    uint16_t symbols (const uint8_t sbn) const;
+    Block_Size extended_symbols (const uint8_t sbn) const;
+    uint32_t max_repair (const uint8_t sbn) const;
+};
+
+template <typename In_It, typename Fwd_It>
+class Decoder
+{
+public:
+    Decoder (const Decoder&) = delete;
+    Decoder& operator= (const Decoder&) = delete;
+    Decoder (Decoder&&) = delete;
+    Decoder& operator= (Decoder&&) = delete;
+    ~Decoder();
+    Decoder (const RFC6330_OTI_Common_Data common,
+                                const RFC6330_OTI_Scheme_Specific_Data scheme);
+
+    Decoder (const uint64_t size, const uint16_t symbol_size,
+                                                    const uint16_t sub_blocks,
+                                                    const uint8_t blocks,
+                                                    const uint8_t alignment);
+    It::Decoder::Block_Iterator<In_It, Fwd_It> begin ();
+    const It::Decoder::Block_Iterator<In_It, Fwd_It> end ();
+    operator bool() const;
+
+
+    std::future<std::pair<Error, uint8_t>> compute (const Compute flags);
+
+
+
+
+    std::vector<bool> end_of_input (const Fill_With_Zeros fill,
+                                                        const uint8_t block);
+    std::vector<bool> end_of_input (const Fill_With_Zeros fill);
+
+
+
+    uint64_t decode_symbol (Fwd_It &start, const Fwd_It end, const uint16_t esi,
+                                                            const uint8_t sbn);
+    uint64_t decode_bytes (Fwd_It &start, const Fwd_It end, const uint8_t skip);
+    size_t decode_block_bytes (Fwd_It &start, const Fwd_It end,
+                                                            const uint8_t skip,
+                                                            const uint8_t sbn);
+
+
+
+    Decoder_written decode_aligned (Fwd_It &start, const Fwd_It end,
+                                                            const uint8_t skip);
+    Decoder_written decode_block_aligned (Fwd_It &start,
+                                                            const Fwd_It end,
+                                                            const uint8_t skip,
+                                                            const uint8_t sbn);
+
+    Error add_symbol (In_It &start, const In_It end, const uint32_t id);
+    Error add_symbol (In_It &start, const In_It end, const uint32_t esi,
+                                                            const uint8_t sbn);
+    Error add_packet (In_It &start, const In_It end);
+
+    uint8_t blocks_ready();
+    bool is_ready();
+    bool is_block_ready (const uint8_t block);
+    void free (const uint8_t sbn);
+    uint64_t bytes() const;
+    uint8_t blocks() const;
+    uint32_t block_size (const uint8_t sbn) const;
+    uint16_t symbol_size() const;
+    uint16_t symbols (const uint8_t sbn) const;
+    Block_Size extended_symbols (const uint8_t sbn) const;
+};
+
+} // namespace Impl
+} // namespace RFC6330__v1
+
