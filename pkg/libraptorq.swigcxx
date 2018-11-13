@@ -946,15 +946,6 @@ public:
 
 constexpr uint64_t max_data = RFC6330_max_data;
 
-namespace Impl {
-
-template <typename Rnd_It, typename Fwd_It>
-class Encoder;
-template <typename In_It, typename Fwd_It>
-class Decoder;
-
-} // namespace Impl
-
 // Expose Encoder and Decoder into RFC6330__v1
 template <typename Rnd_It, typename Fwd_It>
 using Encoder = Impl::Encoder<Rnd_It, Fwd_It>;
