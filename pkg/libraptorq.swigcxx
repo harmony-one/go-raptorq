@@ -735,6 +735,11 @@ using Compress = RaptorQ__v1::Compress;
 using Error = RaptorQ__v1::Error;
 using Fill_With_Zeros = RaptorQ__v1::Fill_With_Zeros;
 using Work_State = RaptorQ__v1::Work_State;
+struct Decoder_written
+{
+    uint64_t written;
+    uint8_t offset;
+};
 #if 0
 #endif
 using RaptorQ__v1::supported_compressions;
