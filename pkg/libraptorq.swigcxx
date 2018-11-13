@@ -748,18 +748,9 @@ using RaptorQ__v1::set_compression;
 using RaptorQ__v1::local_cache_size;
 using RaptorQ__v1::get_local_cache_size;
 
-} // namespace RFC6330__v1
-
-namespace RFC6330__v1 {
-
 bool set_thread_pool (const size_t threads,
                       const uint16_t max_block_concurrency,
                       const RFC6330__v1::Work_State exit_type);
-// TODO ek: where is Work_State defined?
-
-} // namespace RFC6330__v1
-
-namespace RFC6330__v1 {
 namespace Impl {
 
 template<typename Rnd_It, typename Fwd_It>
@@ -952,9 +943,6 @@ public:
 
 } // namespace Decoder
 } // namespace It
-} // namespace RFC6330__v1
-
-namespace RFC6330__v1 {
 
 constexpr uint64_t max_data = RFC6330_max_data;
 
