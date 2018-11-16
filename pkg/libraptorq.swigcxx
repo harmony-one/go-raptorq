@@ -1065,6 +1065,5 @@ public:
 } // namespace Impl
 } // namespace RFC6330__v1
 
-%template(Bytes) std::vector<uint8_t>;
 %template(BytesEncoder) RFC6330__v1::Impl::Encoder<std::vector<uint8_t>::iterator, std::vector<uint8_t>::iterator>;
 %template(BytesDecoder) RFC6330__v1::Impl::Decoder<std::vector<uint8_t>::iterator, std::vector<uint8_t>::iterator>;
