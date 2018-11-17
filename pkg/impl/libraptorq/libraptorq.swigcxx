@@ -742,8 +742,6 @@ struct Decoder_written
     uint64_t written;
     uint8_t offset;
 };
-#if 0
-#endif
 using RaptorQ__v1::supported_compressions;
 using RaptorQ__v1::get_compression;
 using RaptorQ__v1::set_compression;
