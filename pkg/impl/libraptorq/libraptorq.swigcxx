@@ -998,6 +998,7 @@ public:
     Block_Size extended_symbols (const uint8_t sbn) const;
     uint32_t max_repair (const uint8_t sbn) const;
 };
+%rename(Initialized) Encoder::operator bool;
 
 template <typename In_It, typename Fwd_It>
 class Decoder
@@ -1065,6 +1066,7 @@ public:
     uint16_t symbols (const uint8_t sbn) const;
     Block_Size extended_symbols (const uint8_t sbn) const;
 };
+%rename(Initialized) Decoder::operator bool;
 
 } // namespace Impl
 } // namespace RFC6330__v1
