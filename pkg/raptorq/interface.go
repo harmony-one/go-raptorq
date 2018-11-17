@@ -13,9 +13,9 @@ when creating an Encoder.
 
 On the other side, the receiver creates a Decoder for the same source object,
 then keeps feeding the Decoder with the encoding symbols received from the
-sender, until the Decoder is able to recover the source object from the
-encoding symbols.  Once the source object has been recovered, the receiver
-closes and discards the Decoder.
+sender, until the Decoder is able to recover the source object from the encoding
+symbols.  Once the source object has been recovered, the receiver closes and
+discards the Decoder.
 
 An encoding symbol is a unit data of transmission.  Each encoding symbol is
 identified by a (SBN, ESI) pair, where SBN is the 8-bit serial number of the
@@ -36,13 +36,13 @@ additional symbol adds roughly “two nines” to the decoding success probabili
 In the example above, 1025 encoding symbols would mean 99.99%, and 1026 encoding
 symbols would mean 99.9999%.
 
-It is okay for an encoding symbol to be completely lost (erased) during
-transit.  For each encoding symbol lost, the encoder simply needs to generate
-and send another encoding symbol.  The sender need not know which encoding
-symbol was lost; a brand new encoding symbol would be able to replace for any
-previously sent-and-lost encoding symbol.  The sender may even anticipate losses
-and send additional encoding symbols in advance without having to wait for
-negative acknowledgements (NAKs) from the receiver.
+It is okay for an encoding symbol to be completely lost (erased) during transit.
+For each encoding symbol lost, the encoder simply needs to generate and send
+another encoding symbol.  The sender need not know which encoding symbol was
+lost; a brand new encoding symbol would be able to replace for any previously
+sent-and-lost encoding symbol.  The sender may even anticipate losses and send
+additional encoding symbols in advance without having to wait for negative
+acknowledgements (NAKs) from the receiver.
 
 (Proactively sending redundant symbols this way is called forward error
 correction (FEC), and is useful to reduce or even eliminate round-trip delays
@@ -134,8 +134,8 @@ type Encoder interface {
 	// or 0 if sbn is out of range.  “K” in RFC 6330.
 	MinSymbols(sbn uint8) uint16
 
-	// MaxSymbols returns the maximum number of encoding symbols the encoder
-	// can generate for the given source block, or 0 if sbn is out of range.
+	// MaxSymbols returns the maximum number of encoding symbols the encoder can
+	// generate for the given source block, or 0 if sbn is out of range.
 	MaxSymbols(sbn uint8) uint32
 
 	// Close closes the Encoder.  After an Encoder is closed, all methods but
