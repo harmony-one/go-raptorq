@@ -979,7 +979,8 @@ public:
     RFC6330_OTI_Common_Data OTI_Common() const;
     RFC6330_OTI_Scheme_Specific_Data OTI_Scheme_Specific() const;
 
-    std::future<std::pair<Error, uint8_t>> compute (const Compute flags);
+    // TODO ek – blocked by https://github.com/swig/swig/issues/1044
+    //std::future<std::pair<Error, uint8_t>> compute (const Compute flags);
 
     size_t precompute_max_memory ();
     size_t encode (Fwd_It &output, const Fwd_It end, const uint32_t esi,
@@ -1018,7 +1019,8 @@ public:
     operator bool() const;
 
 
-    std::future<std::pair<Error, uint8_t>> compute (const Compute flags);
+    // TODO ek – blocked by https://github.com/swig/swig/issues/1044
+    //std::future<std::pair<Error, uint8_t>> compute (const Compute flags);
 
 
 
