@@ -143,29 +143,30 @@ type Encoder interface {
 // EncoderFactory is a factory of Encoder instances.
 type EncoderFactory interface {
 	/*
-	   NewEncoder creates and returns an Encoder that can encode the given source
-	   object into symbols.
+		NewEncoder creates and returns an Encoder that can encode the given
+		source object into symbols.
 
-	   input is the source object to encode.
+		input is the source object to encode.
 
-	   symbolSize is the encoding symbol size, in octets.
+		symbolSize is the encoding symbol size, in octets.
 
-	   minSubSymbolSize is the minimum encoding symbol size allowed, in octets.
-	   (If you are not sure, or if you do not want internal interleaving of source
-	   symbols, set it equal to symbolSize.)
+		minSubSymbolSize is the minimum encoding symbol size allowed, in octets.
+		(If you are not sure, or if you do not want internal interleaving of
+		source symbols, set it equal to symbolSize.)
 
-	   maxSubBlockSize is the maximum size block that is decodable in working
-	   memory, in octets.  Iff this is lower than the source object size, the
-	   source object will be split into more than one source blocks.  The maximum
-	   allowed value is 56403 * symbolSize.
+		maxSubBlockSize is the maximum size block that is decodable in working
+		memory, in octets.  Iff this is lower than the source object size, the
+		source object will be split into more than one source blocks.  The
+		maximum allowed value is 56403 * symbolSize.
 
-	   alignment is an internal alignment parameter, in bytes.  Typically this is a
-	   power of 2, up to implementation-defined maximum.  Larger alignment will
-	   speed up calculation, at the expense of slightly higher transmission size
-	   overhead.  Both symbolSize and minSubSymbolSize must be a multiple of this.
+		alignment is an internal alignment parameter, in bytes.  Typically this
+		is a power of 2, up to implementation-defined maximum.  Larger alignment
+		will speed up calculation, at the expense of slightly higher
+		transmission size overhead.  Both symbolSize and minSubSymbolSize must
+		be a multiple of this.
 
-	   On success, NewEncoder returns an Encoder instance and nil error; on
-	   failure, it returns nil Encoder and an error code.
+		On success, NewEncoder returns an Encoder instance and nil error; on
+		failure, it returns nil Encoder and an error code.
 	*/
 	New(input []byte, symbolSize uint16, minSubSymbolSize uint16,
 		maxSubBlockSize uint32, alignment uint8) (enc Encoder, err error)
@@ -180,4 +181,14 @@ type Decoder interface {
 
 // DecoderFactory is a factory of Decoder instances.
 type DecoderFactory interface {
+	/*
+		NewDecoder creates and returns a Decoder that can decode incoming source
+		symbols and recover the original source object.
+
+		commonOTI is the Common FEC Object Transmission Information, received
+		from the sender's encoder.
+
+		schemeSpecificOTI is the Scheme-Specific FEC Object Transmission
+		Information, sent by
+	*/
 }
