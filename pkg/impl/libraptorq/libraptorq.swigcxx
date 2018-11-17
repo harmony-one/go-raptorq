@@ -1,11 +1,12 @@
 %module libraptorq
 
+%include "stdint.swg"
+%include "slice.swg"
 %{
 #include <iterator>
 #include <vector>
 #include <future>
 #include <utility>
-#include <stdint.h>
 #define RQ_LITTLE_ENDIAN  // TODO ek: uh... un-hack this before we hit mobile?
 #include <RaptorQ/RFC6330_v1_hdr.hpp>
 %}
@@ -984,11 +985,11 @@ public:
     //std::future<std::pair<Error, uint8_t>> compute (const Compute flags);
 
     size_t precompute_max_memory ();
-    size_t encode (Fwd_It &output, const Fwd_It end, const uint32_t esi,
+    size_t encode (Fwd_It &SLICEBEGIN, const Fwd_It SLICEEND, const uint32_t esi,
                                                             const uint8_t sbn);
 
-    size_t encode (Fwd_It &output, const Fwd_It end, const uint32_t id);
-    size_t encode_packet (Fwd_It &output, const Fwd_It end, const uint32_t id);
+    size_t encode (Fwd_It &SLICEBEGIN, const Fwd_It SLICEEND, const uint32_t id);
+    size_t encode_packet (Fwd_It &SLICEBEGIN, const Fwd_It SLICEEND, const uint32_t id);
 
     void free (const uint8_t sbn);
     uint8_t blocks() const;
@@ -1034,26 +1035,26 @@ public:
 
 
 
-    uint64_t decode_symbol (Fwd_It &start, const Fwd_It end, const uint16_t esi,
+    uint64_t decode_symbol (Fwd_It &SLICEBEGIN, const Fwd_It SLICEEND, const uint16_t esi,
                                                             const uint8_t sbn);
-    uint64_t decode_bytes (Fwd_It &start, const Fwd_It end, const uint8_t skip);
-    size_t decode_block_bytes (Fwd_It &start, const Fwd_It end,
+    uint64_t decode_bytes (Fwd_It &SLICEBEGIN, const Fwd_It SLICEEND, const uint8_t skip);
+    size_t decode_block_bytes (Fwd_It &SLICEBEGIN, const Fwd_It SLICEEND,
                                                             const uint8_t skip,
                                                             const uint8_t sbn);
 
 
 
-    Decoder_written decode_aligned (Fwd_It &start, const Fwd_It end,
+    Decoder_written decode_aligned (Fwd_It &SLICEBEGIN, const Fwd_It SLICEEND,
                                                             const uint8_t skip);
-    Decoder_written decode_block_aligned (Fwd_It &start,
-                                                            const Fwd_It end,
+    Decoder_written decode_block_aligned (Fwd_It &SLICEBEGIN,
+                                                            const Fwd_It SLICEEND,
                                                             const uint8_t skip,
                                                             const uint8_t sbn);
 
-    Error add_symbol (In_It &start, const In_It end, const uint32_t id);
-    Error add_symbol (In_It &start, const In_It end, const uint32_t esi,
+    Error add_symbol (In_It &SLICEBEGIN, const In_It SLICEEND, const uint32_t id);
+    Error add_symbol (In_It &SLICEBEGIN, const In_It SLICEEND, const uint32_t esi,
                                                             const uint8_t sbn);
-    Error add_packet (In_It &start, const In_It end);
+    Error add_packet (In_It &SLICEBEGIN, const In_It SLICEEND); // 4
 
     uint8_t blocks_ready();
     bool is_ready();
@@ -1071,5 +1072,5 @@ public:
 } // namespace Impl
 } // namespace RFC6330__v1
 
-%template(BytesEncoder) RFC6330__v1::Impl::Encoder<std::vector<uint8_t>::iterator, std::vector<uint8_t>::iterator>;
-%template(BytesDecoder) RFC6330__v1::Impl::Decoder<std::vector<uint8_t>::iterator, std::vector<uint8_t>::iterator>;
+%template(BytesEncoder) RFC6330__v1::Impl::Encoder<unsigned char *, unsigned char *>;
+%template(BytesDecoder) RFC6330__v1::Impl::Decoder<unsigned char *, unsigned char *>;
