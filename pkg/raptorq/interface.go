@@ -143,8 +143,8 @@ type Encoder interface {
 // EncoderFactory is a factory of Encoder instances.
 type EncoderFactory interface {
 	/*
-		NewEncoder creates and returns an Encoder that can encode the given
-		source object into symbols.
+		New creates and returns an Encoder that can encode the given source
+		object into symbols.
 
 		input is the source object to encode.
 
@@ -165,11 +165,11 @@ type EncoderFactory interface {
 		transmission size overhead.  Both symbolSize and minSubSymbolSize must
 		be a multiple of this.
 
-		On success, NewEncoder returns an Encoder instance and nil error; on
-		failure, it returns nil Encoder and an error code.
+		On success, New returns an Encoder instance and nil error; on failure,
+		it returns nil Encoder and an error code.
 	*/
 	New(input []byte, symbolSize uint16, minSubSymbolSize uint16,
-		maxSubBlockSize uint32, alignment uint8) (enc Encoder, err error)
+		maxSubBlockSize uint32, alignment uint8) (Encoder, error)
 }
 
 // TODO ek - below
@@ -182,13 +182,17 @@ type Decoder interface {
 // DecoderFactory is a factory of Decoder instances.
 type DecoderFactory interface {
 	/*
-		NewDecoder creates and returns a Decoder that can decode incoming source
+		New creates and returns a Decoder that can decode incoming source
 		symbols and recover the original source object.
 
 		commonOTI is the Common FEC Object Transmission Information, received
 		from the sender's encoder.
 
 		schemeSpecificOTI is the Scheme-Specific FEC Object Transmission
-		Information, sent by
+		Information, received from the sender's encoder.
+
+		On success, New returns a Decoder instance and nil error; on failure,
+		it returns nil Encoder and an error code.
 	*/
+	New(commonOTI uint64, schemeSpecificOTI uint32) (Decoder, error)
 }
