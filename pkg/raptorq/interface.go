@@ -99,7 +99,7 @@ type ObjectInfo interface {
 	NumSourceSymbols(sbn uint8) uint16
 
 	// NumSubBlocks returns the number of sub-blocks.  “N” in RFC 6330.
-	NumSubBlocks() uint8
+	NumSubBlocks() uint16
 
 	// SymbolAlignmentParameter returns the symbol alignment, in octets.  “Al”
 	// in RFC 6330.

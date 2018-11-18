@@ -1,4 +1,4 @@
-%module libraptorq
+%module wrapper
 
 %include "stdint.swg"
 %include "slice.swg"
@@ -728,6 +728,18 @@ bool set_compression(Compress const compression);
 size_t local_cache_size (size_t const local_cache);
 size_t get_local_cache_size();
 
+namespace Impl {
+namespace Endian {
+
+template <typename T>
+constexpr T b_to_h(T const b);
+
+%template(NetToHost16) b_to_h<uint16_t>;
+%template(NetToHost32) b_to_h<uint32_t>;
+%template(NetToHost64) b_to_h<uint64_t>;
+
+} // namespace Endian
+} // namespace Impl
 } // namespace RaptorQ__v1
 
 namespace RFC6330__v1 {
@@ -968,7 +980,7 @@ public:
     Encoder (Encoder&&) = delete;
     Encoder& operator= (Encoder&&) = delete;
     ~Encoder();
-    Encoder (const Rnd_It data_from, const Rnd_It data_to,
+    Encoder (Rnd_It SLICEBEGIN, Rnd_It SLICEEND,
                                             const uint16_t min_subsymbol_size,
                                             const uint16_t symbol_size,
                                             const size_t max_sub_block);
