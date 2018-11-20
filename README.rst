@@ -35,9 +35,76 @@ To use ``go-raptorq`` in your Go application::
 
   $ CGO_CXXFLAGS='-std=c++11' go get simple-rules/go-raptorq
 
-``go-raptorq`` has two main structs, Encoder and Decoder.  One Encoder/Decoder
-object is used to encode/decode one message.  See the godoc **(TODO)** for
-details.
+``go-raptorq`` contains two main interfaces, ``Encoder`` and ``Decoder``.
+
+In order to send a binary object, termed **source object,** the sender creates
+an ``Encoder`` for the source object.  The ``Encoder`` first splits the source
+object into one or more contiguous blocks, termed **source blocks,** then for
+each source block, the ``Encoder`` generates encoded and serially numbered
+chunks of data, termed **encoding symbols.**  For each source block, the sender
+uses the ``Encoder`` to generate as many encoding symbols as needed by the
+receiver to recover the source block.  The sender chooses the size of the
+encoding symbol, in octets, when creating an ``Encoder``.
+
+On the other side, the receiver creates a ``Decoder`` for the same source
+object, then keeps feeding the ``Decoder`` with the encoding symbols received
+from the sender, until the ``Decoder`` is able to recover the source object from
+the encoding symbols.  Once the source object has been recovered, the receiver
+``Close()``-s and discards the ``Decoder``.
+
+An encoding symbol is a unit data of transmission.  Each encoding symbol is
+identified by a (``sbn``, ``esi``) pair, where:
+
+* ``sbn``, or **source block number,** is the 8-bit, zero-based serial number of
+  the source block from which the symbol was generated;
+* ``esi``, or **encoding symbol identifier** is the 24-bit, zero-based serial
+  identifier of the encoding symbol within the source block.
+
+Upon receipt of an encoding symbol, the receiver first needs to identify the
+``Decoder`` to use for the source object to which the received encoding symbol
+belongs, then feed the ``Decoder`` with the encoding symbol, along with its
+``sbn`` and ``esi``.
+
+In order to recover each source block with high probability, the receiver needs
+as many encoding symbols as needed to fulfill the original size (in octets) of
+the source block.  For example, a 1.8MB source block with 1800-byte encoding
+symbols, the receiver would need 1000 encoding symbols with 99% probability.
+Each additional symbol adds roughly “two nines” to the decoding success
+probability.  In the example above:
+
+* 1000 encoding symbols would mean 99.99%,
+* 1001 encoding symbols would mean 99.9999%,
+* 1002 encoding symbols would mean 99.999999%, and so on.
+
+It is okay for an encoding symbol to be completely lost (erased) during transit.
+For each encoding symbol lost, the encoder simply needs to generate and send
+another encoding symbol.  The sender need not know which encoding symbol was
+lost; a brand new encoding symbol would be able to replace for any previously
+sent-and-lost encoding symbol.  The sender may even anticipate losses and send
+additional encoding symbols in advance without having to wait for negative
+acknowledgements (NAKs) from the receiver.
+
+(Proactively sending redundant symbols this way is called forward error
+correction (FEC), and is useful to reduce or even eliminate round-trip delays
+required for reliable object transmission.  It can be seen as a form of
+“insurance,” with the amount of extra, redundant data being its “insurance
+premium.”)
+
+It is NOT okay for an encoding symbol to be corrupted—accidentally or
+maliciously—during transit.  Feeding a ``Decoder`` with such corrupted symbols
+WILL jeopardize recovery of the source object, so the receiver MUST detect and
+discard corrupted encoding symbols, e.g. using checksums calculated and
+transmitted by the sender along with the encoding symbol.
+
+The ``Encoder`` and ``Decoder`` for the same source object should share the
+following information: Total source object size (in octets), symbol size (chosen
+by the sender), number of source blocks, number of sub-blocks (an internal
+detail), and the symbol alignment factor (another internal detail).  The IETF
+Forward Error Correction (FEC) Building Block specification (RFC 5052) and the
+RaptorQ specification (RFC 6330) encapsulate these into two parameters: 64-bit
+Common FEC Object Transmission Information, and 32-bit Scheme-Specific FEC
+Object Transmission Information.  They are available from the sender's
+``Encoder``; the receiver should pass them when creating a ``Decoder``.
 
 Licensing
 =========
