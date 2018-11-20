@@ -134,7 +134,7 @@ type Decoder interface {
 	// SourceObject copies the source object into the given buffer.  buf should
 	// contain enough space to store the entire source object (use
 	// TransferLength() to get the required size).
-	SourceObject(buf []byte) error
+	SourceObject(buf []byte) (n int, err error)
 
 	// Free, on supported implementations, will free memory used for generating
 	// encoding symbols for the given source block.  Once a source block has
