@@ -109,7 +109,7 @@ type EncoderFactory interface {
 		maxSubBlockSize uint32, alignment uint8) (Encoder, error)
 }
 
-// Decoder decodes encoding symbols and reconstructs one object into a series of
+// Decoder decodes encoding symbols and reconstructs one object from a series of
 // symbols.
 type Decoder interface {
 	// Decoder needs to provide object information.
