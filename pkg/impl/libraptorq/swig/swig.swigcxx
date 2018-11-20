@@ -731,12 +731,16 @@ size_t get_local_cache_size();
 namespace Impl {
 namespace Endian {
 
-template <typename T>
-constexpr T b_to_h(T const b);
+template <typename T> constexpr T b_to_h(T const b);
+template <typename T> constexpr T h_to_b(T const h);
 
 %template(NetToHost16) b_to_h<uint16_t>;
 %template(NetToHost32) b_to_h<uint32_t>;
 %template(NetToHost64) b_to_h<uint64_t>;
+
+%template(HostToNet16) h_to_b<uint16_t>;
+%template(HostToNet32) h_to_b<uint32_t>;
+%template(HostToNet64) h_to_b<uint64_t>;
 
 } // namespace Endian
 } // namespace Impl
