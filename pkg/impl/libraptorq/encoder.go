@@ -29,7 +29,7 @@ func finalizeEncoder(encoder *Encoder) {
 }
 
 type Encoder struct {
-	wrapped swig.BytesEncoder
+	wrapped         swig.BytesEncoder
 	maxSubBlockSize uint32
 }
 
