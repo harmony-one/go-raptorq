@@ -71,7 +71,7 @@ func (dec *Decoder) SymbolAlignmentParameter() uint8 {
 }
 
 func (dec *Decoder) Decode(sbn uint8, esi uint32, symbol []byte) {
-	dec.wrapped.Add_symbol(symbol, esi, sbn)
+	dec.wrapped.Add_symbol(symbol, uint(esi), sbn)
 }
 
 func (dec *Decoder) IsSourceBlockReady(sbn uint8) bool {

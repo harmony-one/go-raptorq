@@ -73,7 +73,7 @@ func (enc *Encoder) Encode(sbn uint8, esi uint32, buf []byte) (written uint, err
 	if len(buf) < int(enc.SymbolSize()) {
 		err = errors.New("RaptorQ encoder buffer too small")
 	} else {
-		written = uint(enc.wrapped.Encode(buf, esi, sbn))
+		written = uint(enc.wrapped.Encode(buf, uint(esi), sbn))
 	}
 	return
 }
