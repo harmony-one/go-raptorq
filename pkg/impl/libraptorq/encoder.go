@@ -12,7 +12,7 @@ type EncoderFactory struct {
 
 func (*EncoderFactory) New(input []byte, symbolSize uint16, minSubSymbolSize uint16,
 	maxSubBlockSize uint32, alignment uint8) (enc raptorq.Encoder, err error) {
-	wrapped := swig.NewBytesEncoder(input, minSubSymbolSize, symbolSize,
+	wrapped := swig.InitBytesEncoder(input, minSubSymbolSize, symbolSize,
 		int64(maxSubBlockSize))
 	if !wrapped.Initialized() {
 		swig.DeleteBytesEncoder(wrapped)
@@ -74,6 +74,9 @@ func (enc *Encoder) Encode(sbn uint8, esi uint32, buf []byte) (written uint, err
 		err = errors.New("RaptorQ encoder buffer too small")
 	} else {
 		written = uint(enc.wrapped.Encode(buf, esi, sbn))
+		if written == 0 {
+			err = errors.New("RaptorQ encoder returned an error indication")
+		}
 	}
 	return
 }

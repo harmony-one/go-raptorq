@@ -13,7 +13,7 @@ type DecoderFactory struct {
 func (*DecoderFactory) New(commonOTI uint64, schemeSpecificOTI uint32) (
 	decoder raptorq.Decoder, err error) {
 	wrapped := swig.NewBytesDecoder(swig.HostToNet64(commonOTI),
-		swig.HostToNet32(uint(schemeSpecificOTI)))
+		swig.HostToNet32(schemeSpecificOTI))
 	if wrapped.Initialized() {
 		decoder = &Decoder{wrapped, commonOTI, schemeSpecificOTI}
 		runtime.SetFinalizer(decoder, finalizeDecoder)
