@@ -74,6 +74,9 @@ func (enc *Encoder) Encode(sbn uint8, esi uint32, buf []byte) (written uint, err
 		err = errors.New("RaptorQ encoder buffer too small")
 	} else {
 		written = uint(enc.wrapped.Encode(buf, esi, sbn))
+		if written == 0 {
+			err = errors.New("RaptorQ encoder returned an error indication")
+		}
 	}
 	return
 }
