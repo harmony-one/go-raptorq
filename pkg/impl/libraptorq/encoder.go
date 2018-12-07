@@ -12,7 +12,7 @@ type EncoderFactory struct {
 
 func (*EncoderFactory) New(input []byte, symbolSize uint16, minSubSymbolSize uint16,
 	maxSubBlockSize uint32, alignment uint8) (enc raptorq.Encoder, err error) {
-	wrapped := swig.NewBytesEncoder(input, minSubSymbolSize, symbolSize,
+	wrapped := swig.InitBytesEncoder(input, minSubSymbolSize, symbolSize,
 		int64(maxSubBlockSize))
 	if !wrapped.Initialized() {
 		swig.DeleteBytesEncoder(wrapped)
