@@ -43,7 +43,7 @@ func (dec *Decoder) TransferLength() uint64 {
 }
 
 func (dec *Decoder) SymbolSize() uint16 {
-	return dec.wrapped.Symbol_size()
+	return uint16(dec.commonOTI)
 }
 
 func (dec *Decoder) SchemeSpecificOTI() uint32 {
@@ -51,7 +51,7 @@ func (dec *Decoder) SchemeSpecificOTI() uint32 {
 }
 
 func (dec *Decoder) NumSourceBlocks() uint8 {
-	return dec.wrapped.Blocks()
+	return uint8(dec.schemeSpecificOTI >> 24)
 }
 
 func (dec *Decoder) SourceBlockSize(sbn uint8) uint32 {
