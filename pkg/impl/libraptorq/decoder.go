@@ -105,8 +105,8 @@ func (dec *Decoder) FreeSourceBlock(sbn uint8) {
 func (dec *Decoder) Close() (err error) {
 	switch wrapped := dec.wrapped.(type) {
 	case swig.BytesDecoder:
-		swig.DeleteBytesDecoder(wrapped)
 		dec.wrapped = nil
+		swig.DeleteBytesDecoder(wrapped)
 	default:
 		err = errors.New("RaptorQ decoder already closed")
 	}
