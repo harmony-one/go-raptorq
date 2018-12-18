@@ -10,13 +10,13 @@ import (
 type AlreadyAdded chan<- uint8
 
 func (e AlreadyAdded) Error() string {
-	return fmt.Sprintf("ready-block channel %+v already added")
+	return fmt.Sprintf("ready-block channel %+v already added", e)
 }
 
 type NotFound chan<- uint8
 
 func (e NotFound) Error() string {
-	return fmt.Sprintf("ready-block channel %+v not found")
+	return fmt.Sprintf("ready-block channel %+v not found", e)
 }
 
 // ReadyBlockChannels is a collection of ready-block channels.
