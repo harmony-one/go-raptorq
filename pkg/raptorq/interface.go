@@ -141,7 +141,7 @@ type Decoder interface {
 	// been freed, calling Encode with its SBN may return an error.
 	FreeSourceBlock(sbn uint8)
 
-	// Close closes the Decoder.  After an Decoder is closed, all methods but
+	// Close closes the Decoder.  After a Decoder is closed, all methods but
 	// Close() will panic if called.
 	Close() error
 }
