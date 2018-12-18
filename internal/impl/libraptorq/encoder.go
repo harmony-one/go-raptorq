@@ -2,9 +2,10 @@ package libraptorq
 
 import (
 	"errors"
+	"runtime"
+
 	"github.com/harmony-one/go-raptorq/internal/impl/libraptorq/swig"
 	"github.com/harmony-one/go-raptorq/pkg/raptorq"
-	"runtime"
 )
 
 type EncoderFactory struct {
