@@ -7,12 +7,14 @@ import (
 	"sync"
 )
 
+// AlreadyAdded signals the given ready block channel has already been added.
 type AlreadyAdded chan<- uint8
 
 func (e AlreadyAdded) Error() string {
 	return fmt.Sprintf("ready-block channel %+v already added", e)
 }
 
+// NotFound signals the given ready block channel is not found.
 type NotFound chan<- uint8
 
 func (e NotFound) Error() string {
@@ -26,6 +28,8 @@ type ReadyBlockChannels struct {
 	channels []chan<- uint8
 }
 
+// Reset resets this instance.  Existing channels are closed and removed,
+// and all blocks are reset as not received.
 func (rbcs *ReadyBlockChannels) Reset(numSourceBlocks uint8) {
 	rbcs.mutex.Lock()
 	defer rbcs.mutex.Unlock()
@@ -36,6 +40,12 @@ func (rbcs *ReadyBlockChannels) Reset(numSourceBlocks uint8) {
 	rbcs.ready = make([]bool, numSourceBlocks)
 }
 
+// AddChannel adds the given channel.
+//
+// If any source block has already been received,
+// AddChannel sends its number immediately.
+//
+// If the channel already exists, AddChannel returns an error.
 func (rbcs *ReadyBlockChannels) AddChannel(ch chan<- uint8) (
 	err error,
 ) {
@@ -56,6 +66,11 @@ func (rbcs *ReadyBlockChannels) AddChannel(ch chan<- uint8) (
 	return
 }
 
+// RemoveChannel removes the given channel.
+//
+// Removed channel is not closed.
+//
+// If the given channel is not found, RemoveChannel returns an error.
 func (rbcs *ReadyBlockChannels) RemoveChannel(ch chan<- uint8) (
 	err error,
 ) {
@@ -77,6 +92,11 @@ func (rbcs *ReadyBlockChannels) RemoveChannel(ch chan<- uint8) (
 	return
 }
 
+// AddBlock adds a source block as having been received.
+//
+// For each source block,
+// the first call – and only the first call – sends the block number to all
+// channels registered.
 func (rbcs *ReadyBlockChannels) AddBlock(sbn uint8) {
 	rbcs.mutex.Lock()
 	defer rbcs.mutex.Unlock()
