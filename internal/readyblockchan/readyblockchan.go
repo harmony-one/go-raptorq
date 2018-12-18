@@ -85,10 +85,10 @@ func (rbcs *ReadyBlockChannels) AddBlock(sbn uint8) {
 	}
 	rbcs.ready[sbn] = true
 	for _, ch := range rbcs.channels {
-        go addBlockToChan(sbn, ch)
+		go addBlockToChan(sbn, ch)
 	}
 }
 
 func addBlockToChan(sbn uint8, ch chan<- uint8) {
-    ch <- sbn
+	ch <- sbn
 }
