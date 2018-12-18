@@ -121,6 +121,7 @@ type Decoder interface {
 	// returns; IsSourceBlockReady or IsSourceObjectReady may not
 	// immediately return true even if the symbol made the source block or
 	// the source object available.
+	// Use AddReadyBlockChan if immediate notification is needed.
 	Decode(sbn uint8, esi uint32, symbol []byte)
 
 	// IsSourceBlockReady returns whether the given source block has been fully
@@ -145,6 +146,24 @@ type Decoder interface {
 	// encoding symbols for the given source block.  Once a source block has
 	// been freed, calling Encode with its SBN may return an error.
 	FreeSourceBlock(sbn uint8)
+
+	// AddReadyBlockChan adds a channel through which the decoder shall avail
+	// source blocks ready for retrieval as soon as they become available.
+	//
+	// If any block is currently available,
+	// their source block number is immediately sent into the given channel.
+	//
+	// The added channel is closed when no more blocks are available,
+	// e.g. when the decoder is closed or destroyed.
+	//
+	// If more than one channel is added,
+	// newly available source block numbers are sent to all of them,
+	// in no specific order.
+	AddReadyBlockChan(chan<- uint8) (err error)
+
+	// RemoveReadyBlockChan removes a channel previously added via
+	// AddReadyBlockChan.  It does not close the removed channel.
+	RemoveReadyBlockChan(chan<- uint8) (err error)
 
 	// Close closes the Decoder.  After a Decoder is closed, all methods but
 	// Close() will panic if called.
