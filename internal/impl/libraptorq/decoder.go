@@ -2,7 +2,7 @@ package libraptorq
 
 import (
 	"errors"
-	"github.com/harmony-one/go-raptorq/pkg/impl/libraptorq/swig"
+	"github.com/harmony-one/go-raptorq/internal/impl/libraptorq/swig"
 	"github.com/harmony-one/go-raptorq/internal/readyblockchan"
 	"github.com/harmony-one/go-raptorq/pkg/raptorq"
 	"runtime"
