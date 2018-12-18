@@ -15,7 +15,11 @@ func (*DecoderFactory) New(commonOTI uint64, schemeSpecificOTI uint32) (
 	wrapped := swig.NewBytesDecoder(swig.HostToNet64(commonOTI),
 		swig.HostToNet32(schemeSpecificOTI))
 	if wrapped.Initialized() {
-		decoder = &Decoder{wrapped, commonOTI, schemeSpecificOTI}
+		dec := new(Decoder)
+		dec.wrapped = wrapped
+		dec.commonOTI = commonOTI
+		dec.schemeSpecificOTI = schemeSpecificOTI
+		decoder = dec
 		runtime.SetFinalizer(decoder, finalizeDecoder)
 	} else {
 		swig.DeleteBytesDecoder(wrapped)
