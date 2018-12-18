@@ -116,6 +116,11 @@ type Decoder interface {
 	ObjectInfo
 
 	// Decode decodes a received encoding symbol.
+	//
+	// The result of decoding may not be available immediately after Decode
+	// returns; IsSourceBlockReady or IsSourceObjectReady may not
+	// immediately return true even if the symbol made the source block or
+	// the source object available.
 	Decode(sbn uint8, esi uint32, symbol []byte)
 
 	// IsSourceBlockReady returns whether the given source block has been fully
