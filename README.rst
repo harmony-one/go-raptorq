@@ -33,7 +33,7 @@ Using ``go-raptorq``
 
 To use ``go-raptorq`` in your Go application::
 
-  $ CGO_CXXFLAGS='-std=c++11' go get simple-rules/go-raptorq
+  $ CGO_CXXFLAGS='-std=c++11' go get harmony-one/go-raptorq
 
 ``go-raptorq`` contains two main interfaces, ``Encoder`` and ``Decoder``.
 
