@@ -82,7 +82,7 @@ func (dec *Decoder) readyBlocksLoop() {
 		case swig.Error_NONE:
 			dec.rbcs.AddBlock(sbn)
 		case swig.Error_EXITING:
-			break
+			return
 		}
 	}
 }
